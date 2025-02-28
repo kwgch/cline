@@ -1,0 +1,507 @@
+import { Anthropic } from "@anthropic-ai/sdk"
+import pWaitFor from "p-wait-for"
+import * as vscode from "vscode"
+import * as path from "path"
+import * as os from "os"
+import { ApiConfiguration } from "../shared/api"
+import { AutoApprovalSettings } from "../shared/AutoApprovalSettings"
+import { BrowserSettings } from "../shared/BrowserSettings"
+import { ChatSettings } from "../shared/ChatSettings"
+import { ClineMessage, ClineApiReqInfo, ClineAsk, ClineSay } from "../shared/ExtensionMessage"
+import { HistoryItem } from "../shared/HistoryItem"
+import { findLastIndex } from "../shared/array"
+import { formatResponse } from "./prompts/responses"
+import { parseAssistantMessage, AssistantMessageContent } from "./assistant-message"
+import { ClineIgnoreController } from "./ignore/ClineIgnoreController"
+import { parseMentions } from "./mentions"
+import { formatContentBlockToMarkdown } from "../integrations/misc/export-markdown"
+import { ApiManager } from "./api/ApiManager"
+import { TaskManager, UserContent } from "./task/TaskManager"
+import { StateManager } from "./state/StateManager"
+import { ToolManager } from "./tools/ToolManager"
+import { UIManager } from "./ui/UIManager"
+import { CheckpointManager } from "./checkpoint/CheckpointManager"
+import { ClineProvider } from "./webview/ClineProvider"
+import { DiffViewProvider } from "../integrations/editor/DiffViewProvider"
+
+// Default working directory
+const cwd = vscode.workspace.workspaceFolders?.map((folder) => folder.uri.fsPath).at(0) ?? path.join(os.homedir(), "Desktop")
+
+export class Cline {
+  readonly taskId: string
+  
+  // Core managers
+  private apiManager: ApiManager
+  private taskManager: TaskManager
+  private stateManager: StateManager
+  private toolManager: ToolManager
+  private uiManager: UIManager
+  private checkpointManager: CheckpointManager
+  
+  // State flags
+  private abort: boolean = false
+  private abandoned = false
+  private isInitialized = false
+  private isAwaitingPlanResponse = false
+  private didRespondToPlanAskBySwitchingMode = false
+  private didFinishAbortingStream = false
+  
+  // Configuration
+  private customInstructions?: string
+  private autoApprovalSettings: AutoApprovalSettings
+  private browserSettings: BrowserSettings
+  private chatSettings: ChatSettings
+  
+  constructor(
+    provider: ClineProvider,
+    apiConfiguration: ApiConfiguration,
+    autoApprovalSettings: AutoApprovalSettings,
+    browserSettings: BrowserSettings,
+    chatSettings: ChatSettings,
+    customInstructions?: string,
+    task?: string,
+    images?: string[],
+    historyItem?: HistoryItem,
+  ) {
+    this.autoApprovalSettings = autoApprovalSettings
+    this.browserSettings = browserSettings
+    this.chatSettings = chatSettings
+    this.customInstructions = customInstructions
+    
+    const providerRef = new WeakRef(provider)
+    
+    // Initialize task ID
+    if (historyItem) {
+      this.taskId = historyItem.id
+    } else if (task || images) {
+      this.taskId = Date.now().toString()
+    } else {
+      throw new Error("Either historyItem or task/images must be provided")
+    }
+    
+    // Initialize managers
+    this.taskManager = new TaskManager({
+      taskId: this.taskId,
+      globalStoragePath: provider.context.globalStorageUri.fsPath,
+      providerRef
+    })
+    
+    this.stateManager = new StateManager({
+      taskId: this.taskId,
+      providerRef,
+      taskManager: this.taskManager
+    })
+    
+    this.apiManager = new ApiManager(apiConfiguration, {
+      cwd,
+      customInstructions,
+      browserSettings,
+      providerRef
+    })
+    
+    this.uiManager = new UIManager({
+      providerRef,
+      stateManager: this.stateManager
+    })
+    
+    this.toolManager = new ToolManager({
+      cwd,
+      providerRef,
+      context: provider.context,
+      autoApprovalSettings,
+      browserSettings,
+      onSay: this.say.bind(this),
+      onAsk: this.ask.bind(this),
+      onToolError: this.handleError.bind(this)
+    })
+    
+    this.checkpointManager = new CheckpointManager({
+      taskId: this.taskId,
+      providerRef
+    })
+    
+    // Initialize task
+    if (historyItem) {
+      this.resumeTaskFromHistory()
+    } else if (task || images) {
+      this.startTask(task, images)
+    }
+  }
+  
+  // Task lifecycle methods
+  
+  private async startTask(task?: string, images?: string[]): Promise<void> {
+    // Initialize state
+    await this.stateManager.initialize()
+    
+    // Clear any existing messages
+    this.stateManager.apiConversationHistory = []
+    this.stateManager.clineMessages = []
+    
+    // Update webview
+    await this.providerRef?.deref()?.postStateToWebview()
+    
+    // Send initial task message
+    await this.say("text", task, images)
+    
+    this.isInitialized = true
+    
+    // Start task loop
+    const imageBlocks: Anthropic.ImageBlockParam[] = formatResponse.imageBlocks(images)
+    await this.initiateTaskLoop(
+      [
+        {
+          type: "text",
+          text: `<task>\n${task}\n</task>`,
+        },
+        ...imageBlocks,
+      ],
+      true
+    )
+  }
+  
+  private async resumeTaskFromHistory(): Promise<void> {
+    await this.stateManager.initialize()
+    
+    // Get the last relevant message
+    const lastRelevantMessageIndex = findLastIndex(
+      this.stateManager.clineMessages,
+      (m) => !(m.ask === "resume_task" || m.ask === "resume_completed_task")
+    )
+    
+    if (lastRelevantMessageIndex !== -1) {
+      this.stateManager.clineMessages.splice(lastRelevantMessageIndex + 1)
+    }
+    
+    // Present the cline messages to the user and ask if they want to resume
+    const lastClineMessage = this.stateManager.clineMessages
+      .slice()
+      .reverse()
+      .find((m) => !(m.ask === "resume_task" || m.ask === "resume_completed_task"))
+    
+    let askType = lastClineMessage?.ask === "completion_result" ? "resume_completed_task" : "resume_task"
+    
+    this.isInitialized = true
+    
+    const { response, text, images } = await this.ask(askType)
+    let responseText: string | undefined
+    let responseImages: string[] | undefined
+    
+    if (response === "messageResponse") {
+      await this.say("user_feedback", text, images)
+      responseText = text
+      responseImages = images
+    }
+    
+    // Prepare conversation history for resumption
+    let existingApiConversationHistory = this.stateManager.apiConversationHistory
+    
+    // Prepare user content for resumption
+    const newUserContent = this.taskManager.prepareTaskResumptionContent(
+      lastClineMessage,
+      cwd,
+      this.chatSettings.mode,
+      responseText,
+      responseImages
+    )
+    
+    // Start task loop
+    await this.initiateTaskLoop(newUserContent, false)
+  }
+  
+  private async initiateTaskLoop(userContent: UserContent, isNewTask: boolean): Promise<void> {
+    let nextUserContent = userContent
+    let includeFileDetails = true
+    
+    while (!this.abort) {
+      const didEndLoop = await this.recursivelyMakeClineRequests(nextUserContent, includeFileDetails, isNewTask)
+      includeFileDetails = false
+      
+      if (didEndLoop) {
+        break
+      } else {
+        nextUserContent = [
+          {
+            type: "text",
+            text: formatResponse.noToolsUsed(),
+          },
+        ]
+      }
+    }
+  }
+  
+  async abortTask(): Promise<void> {
+    this.abort = true
+    await this.toolManager.dispose()
+  }
+  
+  // Communication methods
+  
+  async ask(
+    type: ClineAsk,
+    text?: string,
+    partial?: boolean
+  ): Promise<{ response: string; text?: string; images?: string[] }> {
+    return this.uiManager.ask(type, text, partial)
+  }
+  
+  async say(type: ClineSay, text?: string, images?: string[], partial?: boolean): Promise<void> {
+    return this.uiManager.say(type, text, images, partial)
+  }
+  
+  async handleError(action: string, error: Error): Promise<void> {
+    if (this.abandoned) {
+      console.log("Ignoring error since task was abandoned")
+      return
+    }
+    
+    const errorString = `Error ${action}: ${error.message}`
+    await this.say("error", errorString)
+  }
+  
+  // API request handling
+  
+  async recursivelyMakeClineRequests(
+    userContent: UserContent,
+    includeFileDetails: boolean = false,
+    isNewTask: boolean = false
+  ): Promise<boolean> {
+    if (this.abort) {
+      throw new Error("Cline instance aborted")
+    }
+    
+    // Save checkpoint if this is the first API request
+    const isFirstRequest = this.stateManager.clineMessages.filter((m) => m.say === "api_req_started").length === 0
+    if (isFirstRequest) {
+      await this.say("checkpoint_created")
+    }
+    
+    // Show loading message
+    await this.say(
+      "api_req_started",
+      JSON.stringify({
+        request: userContent.map((block) => formatContentBlockToMarkdown(block)).join("\n\n") + "\n\nLoading...",
+      })
+    )
+    
+    // Initialize checkpoint tracker
+    if (isFirstRequest) {
+      await this.checkpointManager.initialize()
+      
+      // Update checkpoint message with commit hash
+      const commitHash = await this.checkpointManager.saveCheckpoint(false, this.stateManager.clineMessages)
+      if (commitHash) {
+        const lastCheckpointMessage = this.stateManager.findLastCheckpointMessage()
+        if (lastCheckpointMessage) {
+          lastCheckpointMessage.lastCheckpointHash = commitHash
+          await this.stateManager.saveClineMessages()
+        }
+      }
+    }
+    
+    // Load context and environment details
+    const [parsedUserContent, environmentDetails] = await this.loadContext(userContent, includeFileDetails)
+    userContent = parsedUserContent
+    
+    // Add environment details
+    userContent.push({ type: "text", text: environmentDetails })
+    
+    // Add to conversation history
+    await this.stateManager.addToApiConversationHistory({
+      role: "user",
+      content: userContent,
+    })
+    
+    // Update API request message
+    const lastApiReqIndex = findLastIndex(this.stateManager.clineMessages, (m) => m.say === "api_req_started")
+    this.stateManager.clineMessages[lastApiReqIndex].text = JSON.stringify({
+      request: userContent.map((block) => formatContentBlockToMarkdown(block)).join("\n\n"),
+    } as ClineApiReqInfo)
+    
+    await this.stateManager.saveClineMessages()
+    await this.providerRef?.deref()?.postStateToWebview()
+    
+    try {
+      // Reset streaming state
+      this.uiManager.resetStreamingState()
+      
+      // Make API request
+      const stream = this.apiManager.attemptApiRequest(
+        this.stateManager.apiConversationHistory,
+        this.stateManager.conversationHistoryDeletedRange,
+        lastApiReqIndex,
+        async (error) => {
+          const errorMessage = this.apiManager.formatErrorWithStatusCode(error)
+          const { response } = await this.ask("api_req_failed", errorMessage)
+          if (response !== "yesButtonClicked") {
+            throw new Error("API request failed")
+          }
+          await this.say("api_req_retried")
+        }
+      )
+      
+      let assistantMessage = ""
+      let reasoningMessage = ""
+      
+      // Process stream
+      for await (const chunk of stream) {
+        if (!chunk) continue
+        
+        switch (chunk.type) {
+          case "usage":
+            // Update API metrics
+            break
+          case "reasoning":
+            reasoningMessage += chunk.reasoning
+            await this.say("reasoning", reasoningMessage, undefined, true)
+            break
+          case "text":
+            if (reasoningMessage && assistantMessage.length === 0) {
+              await this.say("reasoning", reasoningMessage, undefined, false)
+            }
+            
+            assistantMessage += chunk.text
+            
+            // Parse and present content
+            const prevLength = this.uiManager.getAssistantMessageContent().length
+            this.uiManager.setAssistantMessageContent(parseAssistantMessage(assistantMessage))
+            
+            if (this.uiManager.getAssistantMessageContent().length > prevLength) {
+              this.uiManager.setUserMessageContentReady(false)
+            }
+            
+            await this.uiManager.presentAssistantMessage()
+            break
+        }
+        
+        if (this.abort) {
+          console.log("Aborting stream...")
+          break
+        }
+        
+        if (this.uiManager.getDidRejectTool()) {
+          assistantMessage += "\n\n[Response interrupted by user feedback]"
+          break
+        }
+        
+        if (this.uiManager.getDidAlreadyUseTool()) {
+          assistantMessage += "\n\n[Response interrupted by a tool use result. Only one tool may be used at a time and should be placed at the end of the message.]"
+          break
+        }
+      }
+      
+      // Stream completed
+      this.uiManager.setDidCompleteReadingStream(true)
+      
+      // Complete any partial blocks
+      const partialBlocks = this.uiManager.getAssistantMessageContent().filter((block: AssistantMessageContent) => block.partial)
+      partialBlocks.forEach((block: AssistantMessageContent) => {
+        block.partial = false
+      })
+      
+      if (partialBlocks.length > 0) {
+        await this.uiManager.presentAssistantMessage()
+      }
+      
+      // Save assistant response
+      if (assistantMessage.length > 0) {
+        await this.stateManager.addToApiConversationHistory({
+          role: "assistant",
+          content: [{ type: "text", text: assistantMessage }],
+        })
+        
+        // Wait for user message content to be ready
+        await pWaitFor(() => this.uiManager.isUserMessageContentReady())
+        
+        // Check if tool was used
+        const didToolUse = this.uiManager.getAssistantMessageContent().some((block: AssistantMessageContent) => block.type === "tool_use")
+        
+        if (!didToolUse) {
+          // No tool used, prompt for tool use
+          this.uiManager.setUserMessageContent([
+            {
+              type: "text",
+              text: formatResponse.noToolsUsed(),
+            },
+          ])
+        }
+        
+        // Continue with next request
+        return await this.recursivelyMakeClineRequests(this.uiManager.getUserMessageContent())
+      } else {
+        // No assistant response
+        await this.say(
+          "error",
+          "Unexpected API Response: The language model did not provide any assistant messages."
+        )
+        
+        await this.stateManager.addToApiConversationHistory({
+          role: "assistant",
+          content: [
+            {
+              type: "text",
+              text: "Failure: I did not provide a response.",
+            },
+          ],
+        })
+      }
+      
+      return false
+    } catch (error) {
+      return true
+    }
+  }
+  
+  // Context loading
+  
+  async loadContext(userContent: UserContent, includeFileDetails: boolean = false): Promise<[UserContent, string]> {
+    return await Promise.all([
+      Promise.all(
+        userContent.map(async (block) => {
+          if (block.type === "text") {
+            if (
+              block.text.includes("<feedback>") ||
+              block.text.includes("<answer>") ||
+              block.text.includes("<task>") ||
+              block.text.includes("<user_message>")
+            ) {
+              return {
+                ...block,
+                text: await parseMentions(block.text, cwd, this.urlContentFetcher),
+              }
+            }
+          }
+          return block
+        })
+      ),
+      this.getEnvironmentDetails(includeFileDetails),
+    ])
+  }
+  
+  async getEnvironmentDetails(includeFileDetails: boolean = false): Promise<string> {
+    // Implementation would be similar to the original
+    // This is a placeholder for the environment details gathering logic
+    return "<environment_details>\nPlaceholder for environment details\n</environment_details>"
+  }
+  
+  // Utility methods
+  
+  private get providerRef(): WeakRef<ClineProvider> | undefined {
+    return this.toolManager?.options?.providerRef
+  }
+  
+  private get urlContentFetcher(): any {
+    return this.toolManager?.urlContentFetcher
+  }
+  
+  // Update methods
+  
+  updateBrowserSettings(browserSettings: BrowserSettings): void {
+    this.browserSettings = browserSettings
+    this.toolManager.browserSession.browserSettings = browserSettings
+  }
+  
+  updateChatSettings(chatSettings: ChatSettings): void {
+    this.chatSettings = chatSettings
+  }
+}
