@@ -515,3 +515,13 @@ Contributions to the Cline extension are welcome! Please follow these guidelines
 When adding new tools or API providers, follow the existing patterns in the `src/integrations/` and `src/api/providers/` directories, respectively. Ensure that your code is well-documented and includes appropriate error handling.
 
 The `.clineignore` file allows users to specify files and directories that Cline should not access. When implementing new features, respect the `.clineignore` rules and ensure that your code does not attempt to read or modify ignored files.
+
+## Development Rules
+
+When working on the Cline codebase, follow these important rules:
+
+1. **Always commit changes** - Commit your changes to the repository after each significant implementation or update.
+
+2. **Update documentation with implementation** - Ensure that documentation is updated to match the implementation. This includes creating new documentation files when needed and updating existing ones to reflect changes.
+
+3. **Maintain test coverage** - Modify or add tests as needed to ensure all tests pass. Test coverage should be maintained or improved with each change.
