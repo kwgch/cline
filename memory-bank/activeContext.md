@@ -46,6 +46,11 @@ No significant code changes in the current work. The focus has been on documenta
    - Enhance MCP integration with more built-in tools
    - Optimize token usage and context window management
 
+4. **Project Improvements**
+   - Implement improvements from the [improvement issues list](../docs/improvement-issues.md)
+   - Prioritize high-impact enhancements
+   - Address technical debt and architecture improvements
+
 ## Active Decisions and Considerations
 
 ### Documentation Strategy

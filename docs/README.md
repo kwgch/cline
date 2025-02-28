@@ -31,6 +31,7 @@ Welcome to the Cline documentation - your comprehensive guide to using and exten
     -   [Contribution Guidelines](../CONTRIBUTING.md)
     -   [Building the Extension](building.md) ([日本語](building-ja.md))
     -   [VSIX Packaging Notes](vsix-packaging-notes.md) - Troubleshooting and workarounds
+    -   [Improvement Issues](improvement-issues.md) - Potential enhancements and feature ideas
 
 ## Additional Resources
 
