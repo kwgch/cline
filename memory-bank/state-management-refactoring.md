@@ -2,9 +2,9 @@
 
 ## Current Status
 
-The state management refactoring documentation has been completed. The documentation provides a comprehensive plan for implementing a more robust, type-safe, and maintainable state management system. The actual implementation of the code changes is planned for version 3.6.0.
+The state management refactoring is in progress. The documentation has been completed, and the first phase of implementation (Core Extension State Implementation) has been completed. The remaining phases (Webview State Implementation and State Synchronization System) are still pending and planned for version 3.6.0.
 
-**Note:** Only the documentation and planning phases (State Management Audit and State Architecture Design) have been completed. The actual implementation phases (Core Extension State Implementation, Webview State Implementation, and State Synchronization System) are still pending.
+**Note:** The documentation and planning phases (State Management Audit and State Architecture Design) have been completed, as well as the first implementation phase (Core Extension State Implementation). The remaining implementation phases (Webview State Implementation and State Synchronization System) are still pending.
 
 ## Documentation Created
 

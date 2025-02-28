@@ -132,9 +132,9 @@
 
 ### Version Status
 
-- Current Version: 3.4.9
+- Current Version: 3.6.0
 - Release Status: Stable
-- Development Focus: Documentation and usability improvements
+- Development Focus: State management refactoring and usability improvements
 
 ### Development Metrics
 
