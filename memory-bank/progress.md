@@ -87,7 +87,11 @@
    - 🔄 Develop authentication manager
 
 2. **Test Coverage Improvement**
-   - 🔄 Add unit tests for core modules
+   - ✅ Added unit tests for ApiManager (src/core/api/ApiManager.test.ts)
+   - ✅ Added unit tests for CheckpointManager (src/core/checkpoint/CheckpointManager.test.ts)
+   - ✅ Added unit tests for StateManager (src/core/state/StateManager.test.ts)
+   - ✅ Added unit tests for ToolManager (src/core/tools/ToolManager.test.ts)
+   - 🔄 Add unit tests for remaining core modules
    - 🔄 Implement integration tests for key workflows
    - 🔄 Set up React Testing Library for component testing
    - 🔄 Add tests for UI components

@@ -161,10 +161,11 @@ The current focus is on comprehensive refactoring and optimization of the Cline 
 ### Phase 2: Test Coverage Improvement (3 weeks)
 
 1. **Core Extension Tests (Week 5)**
-   - Add unit tests for extracted modules
-   - Implement tests for state management
-   - Create tests for API handling
-   - Test tool execution logic
+   - ✅ Added unit tests for ApiManager (src/core/api/ApiManager.test.ts)
+   - ✅ Added unit tests for CheckpointManager (src/core/checkpoint/CheckpointManager.test.ts)
+   - ✅ Added unit tests for StateManager (src/core/state/StateManager.test.ts)
+   - ✅ Added unit tests for ToolManager (src/core/tools/ToolManager.test.ts)
+   - Implement tests for remaining core modules
    - Implement integration tests for key workflows
 
 2. **Webview UI Tests (Week 6)**
