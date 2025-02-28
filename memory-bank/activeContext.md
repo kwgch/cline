@@ -15,6 +15,7 @@ The current focus is on improving the documentation for the Cline VSCode extensi
 1. **Build Documentation**
    - Added `docs/building.md` with detailed instructions on building the extension and creating VSIX packages
    - Added `docs/building-ja.md` with Japanese translation of the build documentation
+   - Added `docs/vsix-packaging-notes.md` with detailed notes on VSIX packaging, including workarounds for common build issues
    - Updated `docs/README.md` to include references to the new build documentation
    - Updated `README.md` to mention the build process in the "Local Development Instructions" section
    - Updated `locales/ja/README.md` to include a reference to the Japanese build documentation

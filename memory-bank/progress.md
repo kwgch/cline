@@ -62,6 +62,7 @@
    - ✅ Tool usage documentation
    - ✅ MCP documentation
    - ✅ Building and packaging documentation
+   - ✅ VSIX packaging troubleshooting guide
 
 2. **Developer Documentation**
    - ✅ Architecture documentation
