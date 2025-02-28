@@ -29,6 +29,7 @@ Welcome to the Cline documentation - your comprehensive guide to using and exten
 -   **Interested in contributing?** We welcome your input:
     -   Feel free to submit a pull request
     -   [Contribution Guidelines](../CONTRIBUTING.md)
+    -   [Building the Extension](building.md) ([日本語](building-ja.md))
 
 ## Additional Resources
 

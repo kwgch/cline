@@ -158,6 +158,8 @@ To contribute to the project, start with our [Contributing Guide](CONTRIBUTING.m
     ```
 4. Launch by pressing `F5` (or `Run`->`Start Debugging`) to open a new VSCode window with the extension loaded. (You may need to install the [esbuild problem matchers extension](https://marketplace.visualstudio.com/items?itemName=connor4312.esbuild-problem-matchers) if you run into issues building the project.)
 
+5. For building a VSIX package for distribution, see our [Building Guide](docs/building.md).
+
 </details>
 
 <details>

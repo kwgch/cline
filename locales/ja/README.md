@@ -154,6 +154,8 @@ Clineがタスクを進める中で、拡張機能は各ステップでワーク
         ```
 4. `F5`を押して（または`Run`->`Start Debugging`）、拡張機能が読み込まれた新しいVSCodeウィンドウを開きます。（プロジェクトのビルドに問題がある場合は、[esbuild problem matchers extension](https://marketplace.visualstudio.com/items?itemName=connor4312.esbuild-problem-matchers)をインストールする必要があるかもしれません。）
 
+5. 配布用のVSIXパッケージをビルドする方法については、[ビルドガイド](../../docs/building-ja.md)を参照してください。
+
 </details>
 
 ## ライセンス
