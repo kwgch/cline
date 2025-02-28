@@ -69,8 +69,41 @@
    - ✅ Contribution guidelines
    - ✅ Memory bank system
    - ✅ Technical context documentation
+   - ✅ Refactoring and optimization plans
 
 ## What's Left to Build
+
+### Refactoring and Optimization
+
+1. **Code Organization and Modularization**
+   - 🔄 Break down large files (Cline.ts, ClineProvider.ts)
+   - 🔄 Extract tool execution logic into separate modules
+   - 🔄 Move API request handling to dedicated modules
+   - 🔄 Implement message handling module
+   - 🔄 Create checkpoint manager module
+   - 🔄 Extract state management into dedicated modules
+   - 🔄 Implement webview communication module
+   - 🔄 Create MCP handling module
+   - 🔄 Develop authentication manager
+
+2. **Test Coverage Improvement**
+   - 🔄 Add unit tests for core modules
+   - 🔄 Implement integration tests for key workflows
+   - 🔄 Set up React Testing Library for component testing
+   - 🔄 Add tests for UI components
+   - 🔄 Implement E2E tests for critical workflows
+   - 🔄 Set up continuous integration for tests
+
+3. **Performance Optimization**
+   - 🔄 Analyze and optimize dependencies
+   - 🔄 Implement tree shaking for unused code
+   - 🔄 Consider code splitting for the webview UI
+   - 🔄 Optimize React components with memoization
+   - 🔄 Improve rendering performance
+   - 🔄 Optimize asynchronous operations
+   - 🔄 Implement proper resource cleanup
+   - 🔄 Optimize state structure
+   - 🔄 Enhance context window management
 
 ### Feature Enhancements
 
@@ -126,7 +159,7 @@
 2. **Developer Documentation**
    - 🔄 More detailed API documentation
    - 🔄 Advanced customization guides
-   - 🔄 Performance optimization guides
+   - ✅ Performance optimization guides
 
 ## Current Status
 
@@ -134,12 +167,12 @@
 
 - Current Version: 3.6.0
 - Release Status: Stable
-- Development Focus: State management refactoring and usability improvements
+- Development Focus: Comprehensive refactoring, test coverage improvement, and performance optimization
 
 ### Development Metrics
 
-- Active Issues: Ongoing documentation improvements
-- Recent PRs: Documentation updates for build process
+- Active Issues: Large files, limited test coverage, performance concerns
+- Recent PRs: Documentation updates for refactoring and optimization plans
 - Build Status: Stable, with comprehensive documentation
 
 ### User Adoption
@@ -152,17 +185,27 @@
 
 ### Technical Issues
 
-1. **Performance**
-   - Issue: Memory usage can be high with large projects
-   - Status: Being monitored, optimizations planned
-   - Workaround: Use more focused file selection
+1. **Code Structure**
+   - Issue: Large files with too many responsibilities (Cline.ts: 3,165 lines, ClineProvider.ts: 1,844 lines)
+   - Status: Refactoring plan created, implementation pending
+   - Workaround: Use careful, targeted changes to these files
 
-2. **Browser Automation**
+2. **Test Coverage**
+   - Issue: Limited test coverage (only 3 test files in `src/test`, 1 in `src/shared`, 3 in `src/utils`)
+   - Status: Test plan created, implementation pending
+   - Workaround: Manual testing for critical changes
+
+3. **Performance**
+   - Issue: Large bundle sizes (Extension: ~50.5 MB, Webview: ~17.3 MB) and memory usage
+   - Status: Performance optimization plan created, implementation pending
+   - Workaround: Use more focused file selection, restart extension for long sessions
+
+4. **Browser Automation**
    - Issue: Occasional stability issues with browser sessions
    - Status: Under investigation
    - Workaround: Close and relaunch browser when issues occur
 
-3. **Terminal Integration**
+5. **Terminal Integration**
    - Issue: Some complex terminal interactions can be challenging
    - Status: Ongoing improvements
    - Workaround: Break complex commands into simpler steps
@@ -186,12 +229,42 @@
 
 ## Upcoming Milestones
 
+### Refactoring and Optimization Roadmap
+
+1. **Phase 1: Code Organization and Modularization (4 weeks)**
+   - Break down large files into smaller, focused modules
+   - Improve separation of concerns
+   - Enhance code organization and maintainability
+   - Implement clear module boundaries
+
+2. **Phase 2: Test Coverage Improvement (3 weeks)**
+   - Add unit tests for core components
+   - Implement integration tests for key workflows
+   - Create tests for the webview UI
+   - Set up end-to-end testing
+
+3. **Phase 3: Performance Optimization (3 weeks)**
+   - Reduce bundle size
+   - Improve runtime performance
+   - Optimize memory usage
+   - Enhance API efficiency
+
+4. **Phase 4: Documentation and Finalization (2 weeks)**
+   - Update architecture documentation
+   - Create developer guides
+   - Document refactored components
+   - Conduct final testing and review
+
+### General Development Roadmap
+
 1. **Short-term (1-2 months)**
+   - Begin implementation of refactoring plan
    - Complete documentation improvements
    - Address known performance issues
    - Enhance browser automation stability
 
 2. **Medium-term (3-6 months)**
+   - Complete refactoring and optimization
    - Expand MCP capabilities
    - Improve handling of large codebases
    - Enhance user interface and experience
@@ -200,3 +273,4 @@
    - Deeper language-specific features
    - Advanced project understanding capabilities
    - Enhanced collaboration features
+   - Further performance optimizations
