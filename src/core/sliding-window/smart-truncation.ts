@@ -32,8 +32,12 @@ export function scoreMessageRelevance(message: Anthropic.Messages.MessageParam, 
 		)
 
 		// Tool use and results are important context
-		if (hasToolUse) contentScore += 0.3
-		if (hasToolResult) contentScore += 0.3
+		if (hasToolUse) {
+			contentScore += 0.3
+		}
+		if (hasToolResult) {
+			contentScore += 0.3
+		}
 
 		// Check for file content which is important
 		const hasFileContent = message.content.some(
@@ -41,26 +45,34 @@ export function scoreMessageRelevance(message: Anthropic.Messages.MessageParam, 
 				block.type === "text" && (block.text.includes("<file_content") || block.text.includes("<final_file_content")),
 		)
 
-		if (hasFileContent) contentScore += 0.2
+		if (hasFileContent) {
+			contentScore += 0.2
+		}
 
 		// Check for error messages which are important
 		const hasError = message.content.some(
 			(block) => block.type === "text" && block.text.includes("Error") && block.text.includes(":"),
 		)
 
-		if (hasError) contentScore += 0.25
+		if (hasError) {
+			contentScore += 0.25
+		}
 
 		// Check for task-related content
 		const hasTaskContent = message.content.some(
 			(block) => block.type === "text" && (block.text.includes("<task>") || block.text.includes("</task>")),
 		)
 
-		if (hasTaskContent) contentScore += 0.4
+		if (hasTaskContent) {
+			contentScore += 0.4
+		}
 
 		// Check for user feedback which is important
 		const hasUserFeedback = message.content.some((block) => block.type === "text" && block.text.includes("<feedback>"))
 
-		if (hasUserFeedback) contentScore += 0.3
+		if (hasUserFeedback) {
+			contentScore += 0.3
+		}
 	}
 
 	// Combine scores - recency is the primary factor, content is secondary
