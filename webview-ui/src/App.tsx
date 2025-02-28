@@ -6,12 +6,14 @@ import HistoryView from "./components/history/HistoryView"
 import SettingsView from "./components/settings/SettingsView"
 import WelcomeView from "./components/welcome/WelcomeView"
 import AccountView from "./components/account/AccountView"
-import { ExtensionStateContextProvider, useExtensionState } from "./context/ExtensionStateContext"
-import { vscode } from "./utils/vscode"
+import { WebviewStateProvider } from "./state/WebviewStateContext"
+import { useDidHydrateState, useShowAnnouncement, useShowWelcome } from "./state/hooks/useUi"
 import McpView from "./components/mcp/McpView"
 
 const AppContent = () => {
-	const { didHydrateState, showWelcome, shouldShowAnnouncement } = useExtensionState()
+	const didHydrateState = useDidHydrateState()
+	const [showWelcome] = useShowWelcome()
+	const [shouldShowAnnouncement, setShowAnnouncementState] = useShowAnnouncement()
 	const [showSettings, setShowSettings] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
 	const [showMcp, setShowMcp] = useState(false)
@@ -63,9 +65,9 @@ const AppContent = () => {
 	useEffect(() => {
 		if (shouldShowAnnouncement) {
 			setShowAnnouncement(true)
-			vscode.postMessage({ type: "didShowAnnouncement" })
+			setShowAnnouncementState(false)
 		}
-	}, [shouldShowAnnouncement])
+	}, [shouldShowAnnouncement, setShowAnnouncementState])
 
 	if (!didHydrateState) {
 		return null
@@ -102,9 +104,9 @@ const AppContent = () => {
 
 const App = () => {
 	return (
-		<ExtensionStateContextProvider>
+		<WebviewStateProvider>
 			<AppContent />
-		</ExtensionStateContextProvider>
+		</WebviewStateProvider>
 	)
 }
 
