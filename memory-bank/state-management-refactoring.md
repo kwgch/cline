@@ -118,3 +118,36 @@ The implementation will follow these key strategies:
 - The state management refactoring is a significant architectural change that will improve maintainability, type safety, and developer experience.
 - The phased approach allows for incremental improvements without disrupting the existing functionality.
 - Regular testing and validation are essential to ensure that the new system works correctly with the existing codebase.
+
+## Lessons Learned
+
+### Theme Handling Issue (2025-02-28)
+
+**Issue**: After implementing the new webview state management system (commit ac5d7cddcee6915229135ad3d0604db5cfd9c79b), the VSCode extension UI appeared completely dark with no visible content when built and installed.
+
+**Root Cause**: The new state management system (`WebviewStateContainer` and `WebviewStateContext`) did not properly handle the theme information from VSCode. Specifically:
+1. The theme class (`vscode-dark` or `vscode-light`) was not being applied to the document body
+2. The CSS variables from VSCode were not being properly utilized
+3. No default theme was applied before the theme information was received from VSCode
+
+**Solution**:
+1. Reverted to the previous state management system (from commit 106eece365bb032cdf07ce7721d7c2ec4fa51fb6)
+2. Enhanced the `ExtensionStateContext.tsx` file with:
+   - Explicit theme class application to the document body
+   - Error handling for theme parsing
+   - Default theme class application during initialization
+3. Added CSS in `index.css` to ensure proper theming with VSCode CSS variables
+
+**Key Takeaways**:
+1. When implementing a new state management system for VSCode extensions, ensure proper handling of theme information
+2. Always apply a default theme class to the document body to ensure UI visibility even before theme information is received
+3. Use VSCode's CSS variables for theming to maintain consistency with the VSCode UI
+4. Test the extension in both light and dark themes after making changes to the state management system
+5. Consider implementing a fallback mechanism for theme handling to prevent UI issues
+
+**For Future Implementation**:
+When reimplementing the new state management system, ensure that the `WebviewStateContainer` properly:
+1. Applies theme classes to the document body
+2. Handles theme message events correctly
+3. Provides a default theme before receiving theme information from VSCode
+4. Includes error handling for theme parsing

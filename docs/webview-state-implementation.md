@@ -1228,6 +1228,109 @@ export const ApiConfigurationForm: React.FC = () => {
 };
 ```
 
+## Theme Handling
+
+Special attention must be paid to theme handling in VSCode webviews. The theme information is sent from VSCode to the webview, and it's crucial to apply it correctly to ensure the UI is visible and properly styled.
+
+### Theme Message Handling
+
+The `WebviewStateContainer` should handle theme messages from VSCode and apply the theme to the document body:
+
+```typescript
+// webview-ui/src/state/WebviewStateContainer.ts
+private handleExtensionMessage = (event: MessageEvent): void => {
+  const message: ExtensionMessage = event.data;
+  
+  switch (message.type) {
+    // ... other cases
+    
+    case 'theme': {
+      if (message.text) {
+        try {
+          const theme = JSON.parse(message.text);
+          // Apply theme to document body for CSS variables
+          document.body.classList.add(theme.kind === 'dark' ? 'vscode-dark' : 'vscode-light');
+          
+          this.state = {
+            ...this.state,
+            theme,
+          };
+          this.notifyListeners();
+        } catch (error) {
+          console.error("Failed to parse theme:", error);
+        }
+      }
+      break;
+    }
+    
+    // ... other cases
+  }
+};
+```
+
+### Default Theme Application
+
+It's important to apply a default theme class to the document body during initialization to ensure the UI is visible even before the theme information is received from VSCode:
+
+```typescript
+// webview-ui/src/state/WebviewStateContext.tsx
+export const WebviewStateProvider: React.FC<{
+  children: React.ReactNode;
+  initialState?: WebviewState;
+}> = ({ children, initialState = createInitialState() }) => {
+  const stateContainerRef = useRef<WebviewStateContainer>(
+    getWebviewStateContainer(initialState)
+  );
+  const [state, setState] = useState<WebviewState>(stateContainerRef.current.getState());
+  
+  useEffect(() => {
+    // Apply default theme class to ensure UI is visible even before theme is received
+    document.body.classList.add('vscode-dark');
+    
+    // Subscribe to state changes
+    const unsubscribe = stateContainerRef.current.subscribe(setState);
+    
+    // Initialize the webview
+    stateContainerRef.current.initialize();
+    
+    return unsubscribe;
+  }, []);
+  
+  // ... rest of the component
+};
+```
+
+### CSS Variables
+
+VSCode provides CSS variables that should be used for theming to maintain consistency with the VSCode UI. These variables should be used in the CSS files:
+
+```css
+/* webview-ui/src/index.css */
+body {
+  margin: 0;
+  line-height: 1.25;
+  color: var(--vscode-foreground, #cccccc);
+  background-color: var(--vscode-editor-background, #1e1e1e);
+  font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif);
+  font-size: var(--vscode-font-size, 13px);
+}
+
+/* Ensure theme classes are applied */
+body.vscode-light {
+  color: var(--vscode-foreground, #333333);
+  background-color: var(--vscode-editor-background, #ffffff);
+}
+
+body.vscode-dark {
+  color: var(--vscode-foreground, #cccccc);
+  background-color: var(--vscode-editor-background, #1e1e1e);
+}
+```
+
+### Testing Theme Handling
+
+When implementing theme handling, it's important to test the webview in both light and dark themes to ensure the UI is visible and properly styled in both modes. This can be done by changing the VSCode theme in the settings.
+
 ## Conclusion
 
 This implementation provides a solid foundation for the webview state management system. It follows the architecture outlined in the State Architecture Design document and addresses the pain points identified in the State Management Audit.
@@ -1239,6 +1342,7 @@ The key benefits of this implementation include:
 3. **Separation of Concerns**: State logic is organized by domain, making it easier to maintain.
 4. **React Integration**: The state is seamlessly integrated with React components through context and hooks.
 5. **Communication with Core Extension**: The implementation handles communication with the core extension through a well-defined message protocol.
+6. **Robust Theme Handling**: The implementation properly handles VSCode themes to ensure the UI is visible and properly styled.
 
 The next steps in the implementation process would be:
 
@@ -1246,3 +1350,4 @@ The next steps in the implementation process would be:
 2. Add developer tools for debugging and monitoring state changes
 3. Implement error handling and recovery mechanisms
 4. Add state versioning for backward compatibility
+5. Ensure comprehensive testing of theme handling in both light and dark modes
