@@ -117,12 +117,16 @@ export function smartTruncateMessages(
 	targetReduction: number = 0.5,
 ): Anthropic.Messages.MessageParam[] {
 	// If we have 6 or fewer messages, don't truncate
-	if (messages.length <= 6) return messages
+	if (messages.length <= 6) {
+		return messages
+	}
 
 	// Get indices to remove
 	const indicesToRemove = identifyMessagesToRemove(messages, targetReduction)
 
-	if (indicesToRemove.length === 0) return messages
+	if (indicesToRemove.length === 0) {
+		return messages
+	}
 
 	// Create a new array without the removed messages
 	const truncatedMessages = messages.filter((_, index) => index === 0 || !indicesToRemove.includes(index))
@@ -157,7 +161,9 @@ export function smartTruncateMessages(
  * @returns True if the message contains important content
  */
 export function containsImportantContent(message: Anthropic.Messages.MessageParam): boolean {
-	if (!Array.isArray(message.content)) return false
+	if (!Array.isArray(message.content)) {
+		return false
+	}
 
 	// Check for task definition
 	const hasTaskDefinition = message.content.some(
@@ -166,7 +172,9 @@ export function containsImportantContent(message: Anthropic.Messages.MessagePara
 
 	// Check for critical tool results
 	const hasCriticalToolResult = message.content.some((block) => {
-		if (block.type !== "tool_result" || !("content" in block)) return false
+		if (block.type !== "tool_result" || !("content" in block)) {
+			return false
+		}
 
 		const content = typeof block.content === "string" ? block.content : ""
 		return (

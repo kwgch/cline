@@ -102,13 +102,19 @@ export function optimizeSystemPrompt(
  */
 export function shouldIncludeMessage(message: Anthropic.Messages.MessageParam, index: number, totalMessages: number): boolean {
 	// Always include the first message (task)
-	if (index === 0) return true
+	if (index === 0) {
+		return true
+	}
 
 	// Always include the last few messages
-	if (index >= totalMessages - 4) return true
+	if (index >= totalMessages - 4) {
+		return true
+	}
 
 	// Always include messages with important content
-	if (containsImportantContent(message)) return true
+	if (containsImportantContent(message)) {
+		return true
+	}
 
 	// Include other messages based on their position
 	// This is a simple heuristic that keeps more recent messages
@@ -125,7 +131,9 @@ export function shouldIncludeMessage(message: Anthropic.Messages.MessageParam, i
  */
 export function applySelectiveContextInclusion(messages: Anthropic.Messages.MessageParam[]): Anthropic.Messages.MessageParam[] {
 	// If we have 6 or fewer messages, don't filter
-	if (messages.length <= 6) return messages
+	if (messages.length <= 6) {
+		return messages
+	}
 
 	// Filter messages based on importance and position
 	const filteredMessages = messages.filter((message, index) => shouldIncludeMessage(message, index, messages.length))

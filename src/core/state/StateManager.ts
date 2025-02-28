@@ -75,7 +75,9 @@ export class StateManager {
 	}
 
 	getAskResponse(): { response: string; text?: string; images?: string[] } | undefined {
-		if (!this.askResponse) return undefined
+		if (!this.askResponse) {
+			return undefined
+		}
 
 		const result = {
 			response: this.askResponse,
