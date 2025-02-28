@@ -2,7 +2,41 @@
 
 This document contains notes and workarounds for creating a VSIX package for the Cline extension, especially when encountering build issues.
 
-## Standard Build Process
+## Streamlined VSIX Packaging Process
+
+The recommended way to create a VSIX package is to use the streamlined packaging script:
+
+```bash
+# Full build with all checks
+npm run package:vsix
+
+# Quick build that skips non-essential checks
+npm run package:vsix:quick
+```
+
+The streamlined packaging script provides several advantages:
+- Automatically detects which components need to be rebuilt
+- Provides better error handling with clear error messages
+- Includes a "package-only" mode that skips non-essential checks
+- Creates backups to ensure the process can be safely interrupted
+
+### Advanced Options
+
+The packaging script supports additional options for more control:
+
+```bash
+node scripts/package-vsix.js [options]
+```
+
+Options:
+- `--package-only`: Skip non-essential checks and only package the extension
+- `--skip-webview`: Skip rebuilding the webview UI
+- `--skip-lint`: Skip linting
+- `--skip-type-check`: Skip TypeScript type checking
+- `--verbose`: Show detailed output
+- `--help`: Show help
+
+## Standard Build Process (Legacy)
 
 The standard build process for creating a VSIX package is:
 

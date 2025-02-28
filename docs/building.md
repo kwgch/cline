@@ -73,7 +73,31 @@ This will:
 
 ## Creating a VSIX File
 
-A VSIX file is a package format used to distribute VS Code extensions. To create a VSIX file:
+A VSIX file is a package format used to distribute VS Code extensions. There are two ways to create a VSIX file:
+
+### Streamlined Packaging Process (Recommended)
+
+The recommended way to create a VSIX package is to use the streamlined packaging script:
+
+```bash
+# Full build with all checks
+npm run package:vsix
+
+# Quick build that skips non-essential checks
+npm run package:vsix:quick
+```
+
+The streamlined packaging script provides several advantages:
+- Automatically detects which components need to be rebuilt
+- Provides better error handling with clear error messages
+- Includes a "package-only" mode that skips non-essential checks
+- Creates backups to ensure the process can be safely interrupted
+
+For more details and advanced options, see [VSIX Packaging Notes](./vsix-packaging-notes.md).
+
+### Standard Packaging Process
+
+Alternatively, you can use the standard process:
 
 1. Ensure you've built the extension for production:
 
@@ -95,6 +119,12 @@ If you want to create a pre-release version:
 
 ```bash
 vsce package --pre-release
+```
+
+Or with the streamlined process:
+
+```bash
+npm run package:vsix -- --pre-release
 ```
 
 ## Installing the VSIX File
