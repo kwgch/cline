@@ -91,6 +91,9 @@
    - ✅ Added unit tests for CheckpointManager (src/core/checkpoint/CheckpointManager.test.ts)
    - ✅ Added unit tests for StateManager (src/core/state/StateManager.test.ts)
    - ✅ Added unit tests for ToolManager (src/core/tools/ToolManager.test.ts)
+   - ✅ Improved test configuration to handle headless environments
+   - ✅ Created test documentation with environment-specific instructions
+   - ✅ Added separate test scripts for unit tests and VSCode integration tests
    - 🔄 Add unit tests for remaining core modules
    - 🔄 Implement integration tests for key workflows
    - 🔄 Set up React Testing Library for component testing

@@ -30,6 +30,20 @@ The current focus is on comprehensive refactoring and optimization of the Cline 
 
 ## Recent Changes
 
+### Test Configuration Improvements
+
+1. **VSCode Integration Test Handling**
+   - Modified test configuration to skip tests that require a graphical environment
+   - Updated package.json with separate test scripts for unit tests and VSCode integration tests
+   - Created a comprehensive README.md in the test directory explaining the test structure and setup
+   - Added a new test:all script that runs both unit tests and VSCode integration tests
+
+2. **Test Documentation**
+   - Added detailed documentation on running tests in different environments
+   - Documented how to handle tests that require a graphical environment
+   - Added troubleshooting information for common test issues
+   - Provided instructions for setting up Xvfb in CI/CD environments
+
 ### Refactoring and Optimization Planning
 
 1. **Comprehensive Planning**

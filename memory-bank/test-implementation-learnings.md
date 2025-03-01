@@ -204,6 +204,60 @@ This document captures key learnings and best practices discovered during the im
 6. **Insufficient Error Testing**: Always include tests for error scenarios.
 7. **Ignoring TypeScript Errors**: Address TypeScript errors in tests rather than suppressing them.
 
+## Handling Tests in Headless Environments
+
+### VSCode Integration Tests
+
+- **Issue**: VSCode integration tests require a graphical environment (X server) to run, which may not be available in CI/CD pipelines or containerized environments.
+- **Solution**: Separate test scripts for unit tests and VSCode integration tests, with clear documentation on environment requirements.
+- **Example**:
+  ```json
+  "scripts": {
+    "test": "mocha out/shared/**/*.test.js out/utils/**/*.test.js out/api/**/*.test.js",
+    "test:vscode": "vscode-test",
+    "test:all": "npm run test && npm run test:vscode"
+  }
+  ```
+- **Best Practice**: Create comprehensive documentation on test requirements and setup, including instructions for setting up Xvfb in CI/CD environments.
+
+### Test Configuration
+
+- **Issue**: Test configuration needs to be flexible enough to handle different environments.
+- **Solution**: Use environment-specific test configurations and conditional test execution.
+- **Example**:
+  ```javascript
+  // Skip tests that require a graphical environment
+  if (process.env.CI) {
+    describe.skip("VSCode Integration Tests", () => {
+      // Tests that require VSCode API
+    })
+  } else {
+    describe("VSCode Integration Tests", () => {
+      // Tests that require VSCode API
+    })
+  }
+  ```
+- **Best Practice**: Organize tests by their environment requirements to make it easier to run the appropriate tests in each environment.
+
+### Xvfb Setup for CI/CD
+
+- **Issue**: CI/CD environments often lack a graphical display server.
+- **Solution**: Set up Xvfb (X Virtual Framebuffer) to provide a virtual display.
+- **Example**:
+  ```yaml
+  # GitHub Actions workflow example
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Install Xvfb
+          run: sudo apt-get install -y xvfb
+        - name: Run tests with Xvfb
+          run: xvfb-run --auto-servernum npm run test:all
+  ```
+- **Best Practice**: Document the Xvfb setup process in the test documentation to make it easier for contributors to set up their CI/CD pipelines.
+
 ## Conclusion
 
 Implementing effective tests requires attention to TypeScript specifics, proper mocking strategies, and consistent test structure. By following these learnings and best practices, we can create a robust test suite that provides confidence in the codebase and supports the refactoring process.
