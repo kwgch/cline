@@ -78,7 +78,7 @@ export const ExtensionStateContextProvider: React.FC<{
 							config.qwenApiKey,
 							config.mistralApiKey,
 							config.vsCodeLmModelSelector,
-					  ].some((key) => key !== undefined)
+						].some((key) => key !== undefined)
 					: false
 				setShowWelcome(!hasKey)
 				setDidHydrateState(true)
@@ -87,12 +87,12 @@ export const ExtensionStateContextProvider: React.FC<{
 			case "theme": {
 				if (message.text) {
 					try {
-						const themeData = JSON.parse(message.text);
+						const themeData = JSON.parse(message.text)
 						// Apply theme to document body for CSS variables
-						document.body.classList.add(themeData.kind === 'dark' ? 'vscode-dark' : 'vscode-light');
-						setTheme(convertTextMateToHljs(themeData));
+						document.body.classList.add(themeData.kind === "dark" ? "vscode-dark" : "vscode-light")
+						setTheme(convertTextMateToHljs(themeData))
 					} catch (error) {
-						console.error("Failed to parse theme:", error);
+						console.error("Failed to parse theme:", error)
 					}
 				}
 				break
@@ -145,8 +145,8 @@ export const ExtensionStateContextProvider: React.FC<{
 
 	useEffect(() => {
 		// Apply default theme class to ensure UI is visible even before theme is received
-		document.body.classList.add('vscode-dark');
-		
+		document.body.classList.add("vscode-dark")
+
 		vscode.postMessage({ type: "webviewDidLaunch" })
 	}, [])
 

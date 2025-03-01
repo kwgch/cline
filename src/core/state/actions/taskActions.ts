@@ -1,5 +1,5 @@
-import { HistoryItem } from '../../../shared/HistoryItem';
-import { Action, ActionType } from './types';
+import { HistoryItem } from "../../../shared/HistoryItem"
+import { Action, ActionType } from "./types"
 
 /**
  * Adds a task to the history.
@@ -7,9 +7,9 @@ import { Action, ActionType } from './types';
  * @returns The action
  */
 export const addTaskToHistory = (task: HistoryItem): Action => ({
-  type: ActionType.ADD_TASK_TO_HISTORY,
-  payload: task,
-});
+	type: ActionType.ADD_TASK_TO_HISTORY,
+	payload: task,
+})
 
 /**
  * Updates a task in the history.
@@ -17,9 +17,9 @@ export const addTaskToHistory = (task: HistoryItem): Action => ({
  * @returns The action
  */
 export const updateTaskInHistory = (task: HistoryItem): Action => ({
-  type: ActionType.UPDATE_TASK_IN_HISTORY,
-  payload: task,
-});
+	type: ActionType.UPDATE_TASK_IN_HISTORY,
+	payload: task,
+})
 
 /**
  * Deletes a task from the history.
@@ -27,9 +27,9 @@ export const updateTaskInHistory = (task: HistoryItem): Action => ({
  * @returns The action
  */
 export const deleteTaskFromHistory = (taskId: string): Action => ({
-  type: ActionType.DELETE_TASK_FROM_HISTORY,
-  payload: taskId,
-});
+	type: ActionType.DELETE_TASK_FROM_HISTORY,
+	payload: taskId,
+})
 
 /**
  * Sets the current task.
@@ -37,14 +37,14 @@ export const deleteTaskFromHistory = (taskId: string): Action => ({
  * @returns The action
  */
 export const setCurrentTask = (taskId: string): Action => ({
-  type: ActionType.SET_CURRENT_TASK,
-  payload: taskId,
-});
+	type: ActionType.SET_CURRENT_TASK,
+	payload: taskId,
+})
 
 /**
  * Clears the current task.
  * @returns The action
  */
 export const clearCurrentTask = (): Action => ({
-  type: ActionType.CLEAR_CURRENT_TASK,
-});
+	type: ActionType.CLEAR_CURRENT_TASK,
+})

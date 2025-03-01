@@ -185,9 +185,10 @@ export class ProxyServer extends EventEmitter<ProxyServerEvents> {
 
 			// If this is an HTML response and we need to inject HMR, modify the content
 			if (
-				this.options.injectHmr &&
-				proxyRes.headers["content-type"]?.includes("text/html") &&
-				req.url?.endsWith(".html") || req.url === "/"
+				(this.options.injectHmr &&
+					proxyRes.headers["content-type"]?.includes("text/html") &&
+					req.url?.endsWith(".html")) ||
+				req.url === "/"
 			) {
 				let body = ""
 				proxyRes.on("data", (chunk) => {

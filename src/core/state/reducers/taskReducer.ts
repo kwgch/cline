@@ -1,5 +1,5 @@
-import { HistoryItem } from '../../../shared/HistoryItem';
-import { Action, ActionType } from '../actions/types';
+import { HistoryItem } from "../../../shared/HistoryItem"
+import { Action, ActionType } from "../actions/types"
 
 /**
  * Reducer for task history state.
@@ -8,27 +8,21 @@ import { Action, ActionType } from '../actions/types';
  * @param action The action to apply
  * @returns The new task history state
  */
-export const taskReducer = (
-  state: HistoryItem[] = [],
-  currentTaskId: string | undefined,
-  action: Action
-): HistoryItem[] => {
-  switch (action.type) {
-    case ActionType.ADD_TASK_TO_HISTORY:
-      return [...state, action.payload];
-    
-    case ActionType.UPDATE_TASK_IN_HISTORY:
-      return state.map(task => 
-        task.id === action.payload.id ? { ...task, ...action.payload } : task
-      );
-    
-    case ActionType.DELETE_TASK_FROM_HISTORY:
-      return state.filter(task => task.id !== action.payload);
-    
-    default:
-      return state;
-  }
-};
+export const taskReducer = (state: HistoryItem[] = [], currentTaskId: string | undefined, action: Action): HistoryItem[] => {
+	switch (action.type) {
+		case ActionType.ADD_TASK_TO_HISTORY:
+			return [...state, action.payload]
+
+		case ActionType.UPDATE_TASK_IN_HISTORY:
+			return state.map((task) => (task.id === action.payload.id ? { ...task, ...action.payload } : task))
+
+		case ActionType.DELETE_TASK_FROM_HISTORY:
+			return state.filter((task) => task.id !== action.payload)
+
+		default:
+			return state
+	}
+}
 
 /**
  * Reducer for current task ID state.
@@ -37,14 +31,14 @@ export const taskReducer = (
  * @returns The new current task ID state
  */
 taskReducer.currentTaskId = (state: string | undefined, action: Action): string | undefined => {
-  switch (action.type) {
-    case ActionType.SET_CURRENT_TASK:
-      return action.payload;
-    
-    case ActionType.CLEAR_CURRENT_TASK:
-      return undefined;
-    
-    default:
-      return state;
-  }
-};
+	switch (action.type) {
+		case ActionType.SET_CURRENT_TASK:
+			return action.payload
+
+		case ActionType.CLEAR_CURRENT_TASK:
+			return undefined
+
+		default:
+			return state
+	}
+}

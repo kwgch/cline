@@ -1,5 +1,5 @@
-import { ApiConfiguration, ApiProvider } from '../../../shared/api';
-import { Action, ActionType } from './types';
+import { ApiConfiguration, ApiProvider } from "../../../shared/api"
+import { Action, ActionType } from "./types"
 
 /**
  * Updates the API configuration.
@@ -7,9 +7,9 @@ import { Action, ActionType } from './types';
  * @returns The action
  */
 export const updateApiConfiguration = (config: ApiConfiguration): Action => ({
-  type: ActionType.UPDATE_API_CONFIGURATION,
-  payload: config,
-});
+	type: ActionType.UPDATE_API_CONFIGURATION,
+	payload: config,
+})
 
 /**
  * Sets the API provider.
@@ -17,9 +17,9 @@ export const updateApiConfiguration = (config: ApiConfiguration): Action => ({
  * @returns The action
  */
 export const setApiProvider = (provider: ApiProvider): Action => ({
-  type: ActionType.SET_API_PROVIDER,
-  payload: provider,
-});
+	type: ActionType.SET_API_PROVIDER,
+	payload: provider,
+})
 
 /**
  * Sets the API model ID.
@@ -27,9 +27,9 @@ export const setApiProvider = (provider: ApiProvider): Action => ({
  * @returns The action
  */
 export const setApiModelId = (modelId: string): Action => ({
-  type: ActionType.SET_API_MODEL_ID,
-  payload: modelId,
-});
+	type: ActionType.SET_API_MODEL_ID,
+	payload: modelId,
+})
 
 /**
  * Sets the API key.
@@ -37,6 +37,6 @@ export const setApiModelId = (modelId: string): Action => ({
  * @returns The action
  */
 export const setApiKey = (key: string | undefined): Action => ({
-  type: ActionType.SET_API_KEY,
-  payload: key,
-});
+	type: ActionType.SET_API_KEY,
+	payload: key,
+})

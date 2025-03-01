@@ -1,12 +1,12 @@
-import { Action, ActionType } from '../actions/types';
+import { Action, ActionType } from "../actions/types"
 
 /**
  * User information interface.
  */
 export interface UserInfo {
-  displayName: string | null;
-  email: string | null;
-  photoURL: string | null;
+	displayName: string | null
+	email: string | null
+	photoURL: string | null
 }
 
 /**
@@ -16,14 +16,14 @@ export interface UserInfo {
  * @returns The new user information state
  */
 export const userReducer = (state: UserInfo | undefined, action: Action): UserInfo | undefined => {
-  switch (action.type) {
-    case ActionType.SET_USER_INFO:
-      return action.payload;
-    
-    case ActionType.CLEAR_USER_INFO:
-      return undefined;
-    
-    default:
-      return state;
-  }
-};
+	switch (action.type) {
+		case ActionType.SET_USER_INFO:
+			return action.payload
+
+		case ActionType.CLEAR_USER_INFO:
+			return undefined
+
+		default:
+			return state
+	}
+}

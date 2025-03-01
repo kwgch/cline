@@ -70,7 +70,7 @@ export class DevServerManager extends EventEmitter<DevServerEvents> {
 		this.disposables.push(
 			vscode.workspace.onDidSaveTextDocument((document) => {
 				this.handleFileChange(document.uri.fsPath)
-			})
+			}),
 		)
 	}
 
@@ -238,17 +238,17 @@ export class DevServerManager extends EventEmitter<DevServerEvents> {
 						this.emit("log", "Hot reload triggered via proxy server", serverInfo)
 					}
 				}
-				
+
 				// Emit reloaded event
 				this.emit("reloaded", serverInfo)
 			} else {
 				// Stop and restart the server
 				await this.stopServer(id)
-				
+
 				// TODO: Implement server restart
 				// For a full implementation, we would need to store the original server options
 				// and restart the server with the same options
-				
+
 				// For now, just emit the event
 				this.emit("reloaded", serverInfo)
 			}

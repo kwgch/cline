@@ -1,5 +1,5 @@
-import { ClineMessage } from '../../../shared/ExtensionMessage';
-import { Action, ActionType } from './types';
+import { ClineMessage } from "../../../shared/ExtensionMessage"
+import { Action, ActionType } from "./types"
 
 /**
  * Adds a message to the conversation.
@@ -7,9 +7,9 @@ import { Action, ActionType } from './types';
  * @returns The action
  */
 export const addMessage = (message: ClineMessage): Action => ({
-  type: ActionType.ADD_MESSAGE,
-  payload: message,
-});
+	type: ActionType.ADD_MESSAGE,
+	payload: message,
+})
 
 /**
  * Updates a partial message in the conversation.
@@ -17,14 +17,14 @@ export const addMessage = (message: ClineMessage): Action => ({
  * @returns The action
  */
 export const updatePartialMessage = (message: ClineMessage): Action => ({
-  type: ActionType.UPDATE_PARTIAL_MESSAGE,
-  payload: message,
-});
+	type: ActionType.UPDATE_PARTIAL_MESSAGE,
+	payload: message,
+})
 
 /**
  * Clears all messages from the conversation.
  * @returns The action
  */
 export const clearMessages = (): Action => ({
-  type: ActionType.CLEAR_MESSAGES,
-});
+	type: ActionType.CLEAR_MESSAGES,
+})

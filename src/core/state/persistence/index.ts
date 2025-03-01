@@ -1,1 +1,1 @@
-export * from './StatePersistence';
+export * from "./StatePersistence"
